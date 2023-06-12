@@ -195,9 +195,9 @@ class QGenModel:
 
                 prompt = f"Revise {prompts[dataset_name][1]} if it contains errors based on {prompts[dataset_name][0]}. "
 
-                rev_model = AutoModelForSeq2SeqLM.from_pretrained('models/models/flan-t5-xl')
+                rev_model = AutoModelForSeq2SeqLM.from_pretrained('google/flan-t5-xl')
                 rev_model.to(self.device)
-                rev_tokenizer = AutoTokenizer.from_pretrained('models/models/flan-t5-xl')
+                rev_tokenizer = AutoTokenizer.from_pretrained('google/flan-t5-xl')
                 print("Revising queries ... ")
                 for idx in range(0, len(mask_queries), ques_per_passage):
                     q_batch = mask_queries[idx:idx+ques_per_passage]

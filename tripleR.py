@@ -33,7 +33,7 @@ if __name__ == "__main__":
                 type=str,       
                 help="arguana, nfcorpus, scifact"
         )
-        parser.add_arguemnt(
+        parser.add_argument(
                 "--method",
                 type=int,
                 default=0
@@ -54,7 +54,7 @@ if __name__ == "__main__":
                 output_dir=f"checkpoints/output/method{args.method}/{args.dataset}",
                 evaluation_data=f"dataset/{args.dataset}", # place dataset under dataset directory
                 evaluation_output=f"checkpoints/eval/method{args.method}/{args.dataset}",
-                generator="models/query-gen-msmarco-t5-base-v1", # generator="models/flan-t5-xl",
+                generator="BeIR/query-gen-msmarco-t5-base-v1", # generator="google/flan-t5-xl",
                 retrievers=["msmarco-distilbert-base-v3", "msmarco-MiniLM-L-6-v3"],
                 retriever_score_functions=["cos_sim", "cos_sim"],
                 cross_encoder="cross-encoder/ms-marco-MiniLM-L-6-v2",

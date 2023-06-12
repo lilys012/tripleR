@@ -68,12 +68,11 @@ While method 2 and 4 are implemented in [data_loader.py](gpl/data_loader.py), me
 ## Modification
 We slightly modified training config of GPL due to limitation of resources. 
 
-We decreased the training step from 140K to 70K and changed `|corpus size| x queries per passage` from 250K to 100K. 
-
-Furthermore, we didn't use TSDAE nor TAS-B methods.
+We decreased the training step from 140K to 70K and changed `|corpus size| x queries per passage` from 250K to 100K. Furthermore, we didn't use TSDAE nor TAS-B methods.
 
 ## Results
 We report our experiment results below.
-![](assets/tripleR.png)
 
 We note that v1 and v2 for nfcorpus and arguana were conducted with the original GPL training settings.
+
+![](assets/tripleR.png)
