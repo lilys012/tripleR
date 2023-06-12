@@ -112,7 +112,7 @@ class QGenModel:
                     elif method == 3: # erase pseudo-document based on confidence
                         queries.append(self.tokenizer.decode(current, skip_special_tokens=True))
                 return queries
-            elif method == 8: # concatenate v5 with generated query
+            elif method == 7: # concatenate v5 with generated query
                 outs = self.model.generate(
                     input_ids=encodings['input_ids'].to(self.device), 
                     do_sample=True,
@@ -167,7 +167,7 @@ class QGenModel:
                 for i in range(len(new_queries)):
                     queries[i] = queries[i] + " [SEP] " + new_queries[i]
                 return queries
-            elif method == 9:
+            elif method == 8:
                 outs = self.model.generate(
                     input_ids=encodings['input_ids'].to(self.device), 
                     do_sample=True,
