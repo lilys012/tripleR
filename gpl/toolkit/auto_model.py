@@ -21,9 +21,9 @@ class QGenModel:
     
     def generate(self, corpus: List[Dict[str, str]], ques_per_passage: int, top_k: int, max_length: int, top_p: float = None, temperature: float = None, method: int=None, dataset_name: int=None) -> List[str]:
         
-        prompt = [['argument', 'counter argument'], ['passage', 'query'], ['article', 'query'], ['passage', 'debate'], ['passage', 'finding'], ['passage', 'fact'], ['passage', 'question']]
+        prompts = [['argument', 'counter argument'], ['passage', 'query'], ['article', 'query'], ['passage', 'debate'], ['passage', 'finding'], ['passage', 'fact'], ['passage', 'question']]
         if method == 1: # generate pseudo-document w/ flan-t5-xl and task-specific prompt
-            texts = [(self.gen_prefix + f"Read {prompt[dataset_name][0]} and generate {prompt[dataset_name][1]}. {prompt[dataset_name][0]}: " + doc["title"] + " " + doc["text"]) for doc in corpus]
+            texts = [(self.gen_prefix + f"Read {prompts[dataset_name][0]} and generate {prompts[dataset_name][1]}. {prompts[dataset_name][0]}: " + doc["title"] + " " + doc["text"]) for doc in corpus]
         else:
             texts = [(self.gen_prefix + doc["title"] + " " + doc["text"]) for doc in corpus]
         encodings = self.tokenizer(texts, padding=True, truncation=True, return_tensors="pt")
@@ -201,7 +201,7 @@ class QGenModel:
                 print("Revising queries ... ")
                 for idx in range(0, len(mask_queries), ques_per_passage):
                     q_batch = mask_queries[idx:idx+ques_per_passage]
-                    input_batch = [(f"{prompts[dataset_name][1]}: " + q + f" {prompts[dataset_name][0]}: " + c) for q, c in zip(mask_queries[idx:idx+ques_per_passage], [corpus[int(idx/ques_per_passage)]['text'] for _ in range(ques_per_passage)])]
+                    input_batch = [(prompt + f"{prompts[dataset_name][1]}: " + q + f" {prompts[dataset_name][0]}: " + c) for q, c in zip(mask_queries[idx:idx+ques_per_passage], [corpus[int(idx/ques_per_passage)]['text'] for _ in range(ques_per_passage)])]
                     input_ids = rev_tokenizer(input_batch, return_tensors="pt", padding=True).input_ids.to(self.device)
                     gen_ids = rev_model.generate(input_ids, max_new_tokens=64, top_p=0.95, repetition_penalty=1.0, temperature=0.7, num_return_sequences=1)
                     output = rev_tokenizer.batch_decode(gen_ids, skip_special_tokens=True)
