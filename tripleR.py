@@ -16,9 +16,9 @@ methods
 5 : [MASK] pseudo-document based on confidence + put to distilbert-base-uncased {pseudo-doc [SEP] doc} to revise (auto_model)
 6 : concatenate v3 with generated query (auto_model)
 7 : concatenate v5 with generated query (auto_model)
+8 : revise v3 with flan-t5-xl (auto_model)
 
 -- not implemented --
-8 : revise v3 with flan-t5-xl (auto_model)
 9 : generate pseudo-document w/ flan-t5-xl and one-shot example
 10 : [MASK] pseudo-document based on confidence + put to decoder {prompt, pseudo-doc, doc} to revise (X)
 11 : [MASK] pseudo-document based on confidence + retrieve relevant docs to revise (X)

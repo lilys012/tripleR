@@ -103,7 +103,7 @@ def train(
             path_to_generated_data
         ), "At least corpus should exist!"
         corpus = GenericDataLoader(path_to_generated_data).load_corpus()
-        max_len = 100e3
+        max_len = 100e3 # adjusted to 100e3
         if len(corpus) * 3 < max_len:
             queries_per_passage = math.ceil(
                 max_len / len(corpus)

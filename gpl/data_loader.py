@@ -96,7 +96,7 @@ class GenericDataLoader:
                 print("Revising queries ... ")
                 i = 0
                 input_texts, input_qids = [], []
-                for qid in tqdm(self.qrels):
+                for qid in tqdm(self.qrels): # iterate over {qrels}
                     for pid in self.qrels[qid]:
                         if self.qrels[qid][pid] == 1:
                             input_texts.append(prompt + f"{prompts[dataset_name][1]}: " + self.queries[qid] + f" {prompts[dataset_name][0]}: " + self.corpus[pid]["text"])
@@ -105,13 +105,13 @@ class GenericDataLoader:
 
                             if i == batch_size:
                                 input_ids = tokenizer(input_texts, return_tensors="pt", padding=True).input_ids.to(device)
-                                gen_ids = model.generate(input_ids, max_new_tokens=64, top_p=0.95, repetition_penalty=1.0, temperature=0.7, num_return_sequences=1)
+                                gen_ids = model.generate(input_ids, max_new_tokens=64, top_p=0.95, repetition_penalty=1.0, temperature=0.7, num_return_sequences=1) # generate
                                 output = tokenizer.batch_decode(gen_ids, skip_special_tokens=True)
                                 for j in range(len(input_qids)):
                                     rev_queries[input_qids[j]] = output[j]
                                 i = 0
                                 input_texts, input_qids = [], []
-                if i > 0:
+                if i > 0: # generate one more in case batch_size aren't collected
                     input_ids = tokenizer(input_texts, return_tensors="pt", padding=True).input_ids.to(device)
                     gen_ids = model.generate(input_ids, max_new_tokens=64, top_p=0.95, repetition_penalty=1.0, temperature=0.7, num_return_sequences=1)
                     output = tokenizer.batch_decode(gen_ids, skip_special_tokens=True)
@@ -130,13 +130,13 @@ class GenericDataLoader:
                 i = 0
                 diffcnt = 0
                 input_texts, input_qids = [], []
-                for qid in tqdm(self.qrels):
+                for qid in tqdm(self.qrels): # iterate over {qrels}
                     for pid in self.qrels[qid]:
                         if self.qrels[qid][pid] == 1:
                             if not len(self.queries[qid]): continue 
 
                             query = self.queries[qid].split()
-                            ridxs = np.random.choice(len(query), math.ceil(len(query)/10) if method == 5 else 1, replace=False)
+                            ridxs = np.random.choice(len(query), math.ceil(len(query)/10) if method == 5 else 1, replace=False) # randomly mask
                             for ridx in ridxs:
                                 query[ridx] = "[MASK]"
                                 input_qids.append(qid)

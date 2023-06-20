@@ -47,11 +47,11 @@ class QGenModel:
                 word = 0
                 scores = torch.stack(outs['scores']).transpose(0, 1)
                 for i in range(scores.shape[0]): # (bs, out_len, vocab)
-                    values, _ = torch.max(torch.nn.functional.softmax(scores[i], -1), 1)
+                    values, _ = torch.max(torch.nn.functional.softmax(scores[i], -1), 1) # softmax to obtain probabilities
                     current = []
                     batch_query = ""
                     for j in range(len(values)): # out_len
-                        if values[j] < 0.8 and random.random() < 0.4 and self.tokenizer.get_special_tokens_mask([0, outs['sequences'][i][j]], already_has_special_tokens=True)[1] == 0:
+                        if values[j] < 0.8 and random.random() < 0.4 and self.tokenizer.get_special_tokens_mask([0, outs['sequences'][i][j]], already_has_special_tokens=True)[1] == 0: # masking condition
                             if len(current):
                                 decoded = self.tokenizer.decode(current, skip_special_tokens=True)
                                 if len(decoded): batch_query = batch_query + " " + decoded if len(batch_query) else decoded
@@ -69,7 +69,7 @@ class QGenModel:
                 for idx in range(0, len(queries), ques_per_passage):
                     cnt = min(ques_per_passage, len(queries)-idx)
                     q_batch = queries[idx:idx+cnt]
-                    input_batch = [q + " [SEP] " + c for q, c in zip(queries[idx:idx+cnt], [corpus[int(idx/ques_per_passage)]['text'] for _ in range(cnt)])]
+                    input_batch = [q + " [SEP] " + c for q, c in zip(queries[idx:idx+cnt], [corpus[int(idx/ques_per_passage)]['text'] for _ in range(cnt)])] # construct batch per document
                     inputs = rev_tokenizer(input_batch, return_tensors="pt", padding=True, truncation=True, max_length=512).to(self.device)
                     mask_token_index = torch.where(inputs["input_ids"] == rev_tokenizer.mask_token_id)
                     logits = rev_model(**inputs).logits
@@ -78,7 +78,7 @@ class QGenModel:
                         top_1_tokens = torch.topk(mask_token_logits, 1, dim=0).indices
                         # token = rev_tokenizer.decode(top_1_tokens)
                         enc = rev_tokenizer(queries[idx+x], padding=True, truncation=True, return_tensors="pt")['input_ids'].numpy()
-                        pos = np.where(enc[0] == rev_tokenizer.mask_token_id)[0][0]
+                        pos = np.where(enc[0] == rev_tokenizer.mask_token_id)[0][0] # obtain token with maximum probability
                         enc[0][pos] = top_1_tokens
                         queries[idx+x] = rev_tokenizer.decode(enc[0][1:-1])
                         # queries[idx+x] = queries[idx+x].replace('[MASK]', token, 1)
@@ -99,7 +99,7 @@ class QGenModel:
                 word = 0
                 scores = torch.stack(outs['scores']).transpose(0, 1)
                 for i in range(scores.shape[0]): # (bs, out_len, vocab)
-                    values, _ = torch.max(torch.nn.functional.softmax(scores[i], -1), 1)
+                    values, _ = torch.max(torch.nn.functional.softmax(scores[i], -1), 1) # softmax to obtain probabilities
                     current = []
                     for j in range(len(values)): # out_len
                         if values[j] < 0.8 and random.random() < 0.4 and self.tokenizer.get_special_tokens_mask([0, outs['sequences'][i][j]], already_has_special_tokens=True)[1] == 0:
@@ -167,7 +167,7 @@ class QGenModel:
                 for i in range(len(new_queries)):
                     queries[i] = queries[i] + " [SEP] " + new_queries[i]
                 return queries
-            elif method == 8:
+            elif method == 8: # revise v3 with flan-t5-xl
                 outs = self.model.generate(
                     input_ids=encodings['input_ids'].to(self.device), 
                     do_sample=True,
@@ -187,7 +187,7 @@ class QGenModel:
                     values, _ = torch.max(torch.nn.functional.softmax(scores[i], -1), 1)
                     current = []
                     for j in range(len(values)): # out_len
-                        if values[j] < 0.8 and random.random() < 0.4 and self.tokenizer.get_special_tokens_mask([0, outs['sequences'][i][j]], already_has_special_tokens=True)[1] == 0:
+                        if values[j] < 0.8 and random.random() < 0.4 and self.tokenizer.get_special_tokens_mask([0, outs['sequences'][i][j]], already_has_special_tokens=True)[1] == 0: # masking condition
                             pass
                         else: current.append(outs['sequences'][i][j])
                     queries.append(self.tokenizer.decode(outs['sequences'][i], skip_special_tokens=True))
@@ -203,7 +203,7 @@ class QGenModel:
                     q_batch = mask_queries[idx:idx+ques_per_passage]
                     input_batch = [(prompt + f"{prompts[dataset_name][1]}: " + q + f" {prompts[dataset_name][0]}: " + c) for q, c in zip(mask_queries[idx:idx+ques_per_passage], [corpus[int(idx/ques_per_passage)]['text'] for _ in range(ques_per_passage)])]
                     input_ids = rev_tokenizer(input_batch, return_tensors="pt", padding=True).input_ids.to(self.device)
-                    gen_ids = rev_model.generate(input_ids, max_new_tokens=64, top_p=0.95, repetition_penalty=1.0, temperature=0.7, num_return_sequences=1)
+                    gen_ids = rev_model.generate(input_ids, max_new_tokens=64, top_p=0.95, repetition_penalty=1.0, temperature=0.7, num_return_sequences=1) # revise
                     output = rev_tokenizer.batch_decode(gen_ids, skip_special_tokens=True)
                     for j in range(len(output)):
                         queries[idx+j] = queries[idx+j] + " [SEP] " + output[j]
